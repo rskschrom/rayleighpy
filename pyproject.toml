@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="rayleighpy"
+version="0.0.1"
+requires-python = ">= 3.9"
+dependencies = ["numpy>=1.20.0",
+                "pytest>=8.0.0"]
+authors = [{name = "Robert Schrom", email = "robert.s.schrom@nasa.gov"}]
+description = "Implementation of Rayleigh theory for light scattering with Python"
+readme = "README"
+
