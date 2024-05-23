@@ -6,9 +6,9 @@ def spherical_basis(phi, theta):
 
     Parameters
     ----------
-    phi : float
+    phi : float, ndarray
         The azimuthal angle from the x axis.
-    theta : float
+    theta : float, ndarray
         The zenith angle from the z axis.
 
     Returns
@@ -21,11 +21,18 @@ def spherical_basis(phi, theta):
                     -np.sin(theta)])
     e_h = np.array([-np.sin(phi),
                     np.cos(phi),
-                    0.])
+                    phi-phi])
     e_r = np.array([np.sin(theta)*np.cos(phi),
                     np.sin(theta)*np.sin(phi),
                     np.cos(theta)])
-    basis = np.vstack((e_v,e_h,e_r)).T
+    
+    # expand dimensions for vectors in the case of scalar phi and theta
+    if len(e_v.shape)==1:
+        e_v.shape = (3,1)
+        e_h.shape = (3,1)
+        e_r.shape = (3,1)
+        
+    basis = np.concatenate((e_v[:,np.newaxis,:],
+                            e_h[:,np.newaxis,:],
+                            e_r[:,np.newaxis,:]), axis=1)
     return basis
-
-print(spherical_basis(22.*np.pi/180.,63.*np.pi/180.))

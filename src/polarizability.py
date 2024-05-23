@@ -27,9 +27,9 @@ def ellipsoid(a, b, c, eps):
         The polarizability along the c axis of the ellipsoid.
     '''
     # calculate shape factors
-    la = a*b*c/3.*elliprd(a**2., b**2., c**2.)
+    lc = a*b*c/3.*elliprd(a**2., b**2., c**2.)
     lb = a*b*c/3.*elliprd(a**2., c**2., b**2.)
-    lc = 1.-la-lb
+    la = 1.-lb-lc
     
     # get polarizabilities
     alpha_a = 4.*np.pi*a*b*c*(eps-1.)/(3.+3.*la*(eps-1.))

@@ -14,11 +14,11 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
     pc : float complex
         The value of along principle axis c.
     alpha : float
-        The first Euler angle rotation (zyz convention).
+        The first Euler angle rotation (zyz convention, radians).
     beta : float
-        The second Euler angle rotation (zyz convention).
+        The second Euler angle rotation (zyz convention, radians).
     gamma : float
-        The third Euler angle rotation (zyz convention).
+        The third Euler angle rotation (zyz convention, radians).
     
     Returns
     -------
@@ -35,3 +35,26 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
     tensor_tr = rmat.T @ (tensor @ rmat)
     return tensor_tr
 
+def tensor_scat(tensor, basis_inc, basis_sca):
+    '''
+    Transform the polarizability tensor into the 2x2 far-field scattering basis given the incident and scattering polarization bases.
+    
+    Parameters
+    ----------
+    tensor : ndarray
+        The (3,3) polarizability tensor.
+    basis_inc : ndarray
+        A (3,3,N) array of basis vectors for the incident electric field with the columns of the array containing the basis vectors `e_v`, `e_h`, and `e_r` in that order.
+    basis_sca : ndarray
+        A (3,3,M) array of basis vectors for the scattered electric field with the columns of the array containing the basis vectors `e_v`, `e_h`, and `e_r` in that order.
+    
+    Returns
+    -------
+    tensor_sca : ndarray
+        The (2,2,N,M) tensor in the incident and scattered polarization bases.
+    '''
+    vh_inc = basis_inc[:,:2,:]
+    vh_sca = basis_sca[:,:2,:]
+    tensor_sca = np.einsum('ij,jkp->ikp', tensor, vh_inc)
+    tensor_sca = np.einsum('ilq,ikp->lkpq', vh_sca, vh_inc)
+    return tensor_sca
