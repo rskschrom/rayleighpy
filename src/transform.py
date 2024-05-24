@@ -13,11 +13,11 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
         The value of along principle axis b.
     pc : float complex
         The value of along principle axis c.
-    alpha : float
+    alpha : float, ndarray
         The first Euler angle rotation (zyz convention, radians).
-    beta : float
+    beta : float, ndarray
         The second Euler angle rotation (zyz convention, radians).
-    gamma : float
+    gamma : float, ndarray
         The third Euler angle rotation (zyz convention, radians).
     
     Returns
@@ -29,32 +29,50 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
     tensor[0,0] = pa
     tensor[1,1] = pb
     tensor[2,2] = pc
-    rot = Rotation.from_euler('ZYZ', [alpha,beta,gamma])
+    rot = Rotation.from_euler('ZYZ', np.array([alpha,beta,gamma]).T)
     rmat = rot.as_matrix()
-    print(rmat)
-    tensor_tr = rmat.T @ (tensor @ rmat)
+    
+    # add dimension if rotation angles are scalar
+    if len(rmat.shape)==2:
+        rmat.shape = (1,3,3)
+    print(rmat.shape)
+    tensor_tr = np.einsum('ij,ljk->lik', tensor, rmat)
+    tensor_tr = np.einsum('lij,lik->jkl', rmat, tensor_tr)
+    #tensor_tr = rmat.T @ (tensor @ rmat)
     return tensor_tr
 
-def tensor_scat(tensor, basis_inc, basis_sca):
+def tensor_scat(tensor, basis_inc, basis_sca, fscat=False):
     '''
     Transform the polarizability tensor into the 2x2 far-field scattering basis given the incident and scattering polarization bases.
     
     Parameters
     ----------
     tensor : ndarray
-        The (3,3) polarizability tensor.
+        The (3,3,L) polarizability tensor.
     basis_inc : ndarray
         A (3,3,N) array of basis vectors for the incident electric field with the columns of the array containing the basis vectors `e_v`, `e_h`, and `e_r` in that order.
     basis_sca : ndarray
         A (3,3,M) array of basis vectors for the scattered electric field with the columns of the array containing the basis vectors `e_v`, `e_h`, and `e_r` in that order.
-    
+    fscat : bool
+        Whether or not to do the calculation for forward scattering, where the scattered directions equal the incident directions.
+        
     Returns
     -------
     tensor_sca : ndarray
-        The (2,2,N,M) tensor in the incident and scattered polarization bases.
+        The (2,2,L,N,M) tensor in the incident and scattered polarization bases. In the case where `fscat=True`, the output dimension of the tensor is (2,2,L,N).
     '''
     vh_inc = basis_inc[:,:2,:]
     vh_sca = basis_sca[:,:2,:]
-    tensor_sca = np.einsum('ij,jkp->ikp', tensor, vh_inc)
-    tensor_sca = np.einsum('ilq,ikp->lkpq', vh_sca, vh_inc)
+    
+    # expand tensor dimensions if there is only a single tensor
+    if len(tensor.shape)==2:
+        tensor.shape = (3,3,1)
+    
+    if fscat:
+        tensor_sca = np.einsum('ijo,jkp->ikop', tensor, vh_inc)
+        tensor_sca = np.einsum('ilp,ikop->lkop', vh_sca, tensor_sca)
+    else:
+        tensor_sca = np.einsum('ijo,jkp->ikop', tensor, vh_inc)
+        tensor_sca = np.einsum('ilq,ikop->lkopq', vh_sca, tensor_sca)
+    
     return tensor_sca
