@@ -56,3 +56,30 @@ def ampl_fscat_mat(phi, theta, alp_tens, k):
     smat = 1j*k**3./(4.*np.pi)*tensor_scat(alp_tens, bas_inc, bas_inc, fscat=True)
     
     return smat
+    
+def ampl_scat_mat_bh(phi_1d_sca, theta_1d_sca, alp_tens, k):
+    '''
+    Get the amplitude scattering matrices for a polarizability tensor for incident direction along the z axis and a set of scattering angles using the Bohren and Huffman (1983) convention.
+    
+    Parameters
+    ----------
+    phi_1d_sca : ndarray (N,)
+        The scattering plane angles (phi) in radians.
+    theta_1d_sca : ndarray (M,)
+        The scattered theta angles in radians.
+    alp_tens : ndarray
+       A (3,3,L) complex array representing the polarizability tensor.
+    k : float
+       The wave number for the incident wave.
+    Returns
+    -------
+    smat : ndarray
+      A (3,3,L,N,M) array of scattering amplitude matrices for each of the `N` scattering angle pairs.
+    '''
+    # get basis vectors
+    bas_inc = spherical_basis(phi_1d_sca, np.zeros(len(phi_1d_sca)))
+    bas_sca = spherical_basis(np.zeros(len(theta_1d_sca)), theta_1d_sca)
+    print(bas_inc.shape, bas_sca.shape)
+    smat = 1j*k**3./(4.*np.pi)*tensor_scat(alp_tens, bas_inc, bas_sca, bh=True)
+    
+    return smat

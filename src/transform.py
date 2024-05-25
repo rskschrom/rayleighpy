@@ -41,7 +41,7 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
     #tensor_tr = rmat.T @ (tensor @ rmat)
     return tensor_tr
 
-def tensor_scat(tensor, basis_inc, basis_sca, fscat=False):
+def tensor_scat(tensor, basis_inc, basis_sca, fscat=False, bh=False):
     '''
     Transform the polarizability tensor into the 2x2 far-field scattering basis given the incident and scattering polarization bases.
     
@@ -55,6 +55,8 @@ def tensor_scat(tensor, basis_inc, basis_sca, fscat=False):
         A (3,3,M) array of basis vectors for the scattered electric field with the columns of the array containing the basis vectors `e_v`, `e_h`, and `e_r` in that order.
     fscat : bool
         Whether or not to do the calculation for forward scattering, where the scattered directions equal the incident directions.
+    bh : bool
+        Whether to use the Bohren and Huffman (1983) scattering plane convention.
         
     Returns
     -------
@@ -63,6 +65,7 @@ def tensor_scat(tensor, basis_inc, basis_sca, fscat=False):
     '''
     vh_inc = basis_inc[:,:2,:]
     vh_sca = basis_sca[:,:2,:]
+    print(vh_inc.shape, vh_sca.shape)
     
     # expand tensor dimensions if there is only a single tensor
     if len(tensor.shape)==2:
