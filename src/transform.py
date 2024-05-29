@@ -74,6 +74,9 @@ def tensor_scat(tensor, basis_inc, basis_sca, fscat=False, bh=False):
     if fscat:
         tensor_sca = np.einsum('ijo,jkp->ikop', tensor, vh_inc)
         tensor_sca = np.einsum('ilp,ikop->lkop', vh_sca, tensor_sca)
+    elif bh:
+        tensor_sca = np.einsum('ijo,jkp->ikop', tensor, vh_inc)
+        tensor_sca = np.einsum('ilpq,ikop->lkopq', vh_sca, tensor_sca)
     else:
         tensor_sca = np.einsum('ijo,jkp->ikop', tensor, vh_inc)
         tensor_sca = np.einsum('ilq,ikop->lkopq', vh_sca, tensor_sca)

@@ -78,7 +78,16 @@ def ampl_scat_mat_bh(phi_1d_sca, theta_1d_sca, alp_tens, k):
     '''
     # get basis vectors
     bas_inc = spherical_basis(phi_1d_sca, np.zeros(len(phi_1d_sca)))
-    bas_sca = spherical_basis(np.zeros(len(theta_1d_sca)), theta_1d_sca)
+    
+    # 2d grid for theta and phi scattered
+    nphi = len(phi_1d_sca)
+    nthet = len(theta_1d_sca)
+    phi2d, theta2d = np.meshgrid(phi_1d_sca, theta_1d_sca, indexing='ij')
+    phi_sca = phi2d.flatten()
+    theta_sca = theta2d.flatten()
+    
+    bas_sca = spherical_basis(phi_sca, theta_sca)
+    bas_sca.shape = (3,3,nphi,nthet)
     print(bas_inc.shape, bas_sca.shape)
     smat = 1j*k**3./(4.*np.pi)*tensor_scat(alp_tens, bas_inc, bas_sca, bh=True)
     
