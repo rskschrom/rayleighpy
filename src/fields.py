@@ -88,7 +88,6 @@ def ampl_scat_mat_bh(phi_1d_sca, theta_1d_sca, alp_tens, k):
     
     bas_sca = spherical_basis(phi_sca, theta_sca)
     bas_sca.shape = (3,3,nphi,nthet)
-    print(bas_inc.shape, bas_sca.shape)
     smat = 1j*k**3./(4.*np.pi)*tensor_scat(alp_tens, bas_inc, bas_sca, bh=True)
     
     return smat

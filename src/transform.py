@@ -35,10 +35,9 @@ def pc_rotate(pa, pb, pc, alpha, beta, gamma):
     # add dimension if rotation angles are scalar
     if len(rmat.shape)==2:
         rmat.shape = (1,3,3)
-    print(rmat.shape)
+        
     tensor_tr = np.einsum('ij,ljk->lik', tensor, rmat)
     tensor_tr = np.einsum('lij,lik->jkl', rmat, tensor_tr)
-    #tensor_tr = rmat.T @ (tensor @ rmat)
     return tensor_tr
 
 def tensor_scat(tensor, basis_inc, basis_sca, fscat=False, bh=False):
@@ -65,7 +64,6 @@ def tensor_scat(tensor, basis_inc, basis_sca, fscat=False, bh=False):
     '''
     vh_inc = basis_inc[:,:2,:]
     vh_sca = basis_sca[:,:2,:]
-    print(vh_inc.shape, vh_sca.shape)
     
     # expand tensor dimensions if there is only a single tensor
     if len(tensor.shape)==2:
@@ -82,3 +80,50 @@ def tensor_scat(tensor, basis_inc, basis_sca, fscat=False, bh=False):
         tensor_sca = np.einsum('ilq,ikop->lkopq', vh_sca, tensor_sca)
     
     return tensor_sca
+
+def bh_hv_basis(smat_bh, phi):
+    '''
+    Get the scattering amplitude matrices in the h-v basis from scattering amplitude matrices in the Bohren and Huffman (1983) basis.
+    
+    Parameters
+    ----------
+    smat_bh : ndarray
+        The (2,2,N,M) array of scattering ampltiude matrices for `N` particle orientations and `M` scattering directions in the Bohren and Huffman convention for incident direction along the z axis.
+    phi : ndarray
+        The 1D array of length `M` of scattering plane phi angles.
+        
+    Returns
+    -------
+    smat_hv : ndarray
+        The (2,2,N,M) array of scattering amplitude matrices in the h-v convention.
+    '''
+    # 2x2 rotation matrix
+    rmat = np.array([[np.cos(phi),np.sin(phi)],
+                     [-np.sin(phi),np.cos(phi)]])
+    smat_hv = np.einsum('ijkl,jpl->ipkl', smat_bh, rmat)
+    return smat_hv
+
+def scatdir_lab(smat_par, phi_sca, theta_sca):
+    '''
+    Get the scattering amplitude matrices in lab-frame directions for scattering amplitude matrices in the particle frame (i.e., incident propagation direction along the z-axis).
+    
+    Parameters
+    ----------
+    smat_par : ndarray
+        The (2,2,N,M) array of scattering ampltiude matrices for `N` particle orientations and `M` scattering directions in the h-v convention for incident direction along the z axis.
+    phi_sca : ndarray
+        The 1D array of length `M` of scattering phi angles relative to the z-axis propagation direction.
+    theta_sca : ndarray
+        The 1D array of length `M` of scattering theta angles relative to the z-axis propagation direction.
+        
+    Returns
+    -------
+    smat_lab : ndarray
+        The (2,2,N,M) array of scattering amplitude matrices in the lab frame.
+    '''
+    # 2x2 rotation matrix
+    rmat = np.array([[np.cos(phi),-np.sin(phi)],
+                     [np.sin(phi),np.cos(phi)]])
+    #smat_hv = np.einsum('ijk,jlpk->ilpk', rmat, smat_bh)
+    smat_hv = np.einsum('ijkl,jpl->ipkl', smat_bh, rmat)
+    return smat_hv

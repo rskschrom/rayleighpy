@@ -15,7 +15,7 @@ theta_inc = theta_inc.flatten()
 
 
 # create polarizability tensor
-alp_a, alp_b, alp_c = polarizability.ellipsoid(2.,0.7,0.1, 3.17)
+alp_a, alp_b, alp_c = polarizability.ellipsoid(2.,1.9,0.1, 3.17)
 print(alp_a, alp_b, alp_c)
 
 '''
@@ -26,9 +26,9 @@ beta = np.random.rand(nang)*np.pi
 gamma = np.zeros([nang])
 #gamma = np.random.rand(nang)*2.*np.pi
 '''
-alp_tens = transform.pc_rotate(alp_a, alp_b, alp_c, 0., 0., 0.)
+alp_tens = transform.pc_rotate(alp_a, alp_b, alp_c, phi_inc, theta_inc, phi_inc)
 print(alp_tens.shape)
-
+norient = len(phi_inc)
 
 '''
 bas_inc = vectors.spherical_basis(phi_inc, theta_inc)
@@ -43,7 +43,7 @@ k = 2.*np.pi/wavl
 smat = fields.ampl_scat_mat_bh(phi, theta, alp_tens, k)
 #smat = fields.ampl_fscat_mat(phi_inc, theta_inc, alp_tens, k)
 print(smat.shape)
-smat.shape = (2,2,1,len(phi)*len(theta))
+smat.shape = (2,2,norient,len(phi)*len(theta))
 
 # test plot
 #zi = np.argmin(alpha**2.+beta**2.)
@@ -51,10 +51,10 @@ smat.shape = (2,2,1,len(phi)*len(theta))
 
 fig = plt.figure(figsize=(12,10))
 ax = fig.add_subplot(2,1,1)
-plt.scatter(phi_inc, theta_inc, c=np.abs(smat[0,0,0,:])**2, s=10., cmap='Spectral_r')
+plt.scatter(phi_inc, theta_inc, c=np.abs(smat[0,0,67,:])**2, s=10., cmap='Spectral_r')
 plt.colorbar()
 
 ax = fig.add_subplot(2,1,2)
-plt.scatter(phi_inc, theta_inc, c=np.abs(smat[1,1,0,:])**2, s=10., cmap='Spectral_r')
+plt.scatter(phi_inc, theta_inc, c=np.abs(smat[1,1,67,:])**2, s=10., cmap='Spectral_r')
 plt.colorbar()
 plt.savefig('scat.png')
